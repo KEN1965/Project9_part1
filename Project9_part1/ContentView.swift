@@ -6,20 +6,43 @@
 //
 
 import SwiftUI
+//パスとは、「ここから始めて、ここまで線を引き、そこに円を追加する」などの一連の描画命令
+//シェイプはパスを使用して作成されるため、パスを理解すれば簡単にシェイプを作成できる
+struct Triangle: Shape {
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        
+        path.move(to: CGPoint(x: rect.midX, y: rect.minY))
+        path.addLine(to: CGPoint(x: rect.minX, y: rect.maxY))
+        path.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY))
+        path.addLine(to: CGPoint(x: rect.midX, y: rect.minY))
+        
+        return path
+    }
+}
+//shapeをカスタマイズ：円弧形状の最も単純なパターン記述
+struct Arc: Shape {
+    var startAngle: Angle
+    var endAngle: Angle
+    var clockwise: Bool
+    
+    func path(in rect: CGRect) -> Path {//0度を真上に持っていきたい
+        let rotationAdjustment = Angle.degrees(90)
+        let modifiedStart = startAngle - rotationAdjustment
+        let modifiedEnd = endAngle - rotationAdjustment
+        
+        var path = Path()
+        path.addArc(center: CGPoint(x: rect.midX, y: rect.midY), radius: rect.width / 2, startAngle: modifiedStart, endAngle: modifiedEnd, clockwise: !clockwise)
+        
+        return path
+    }
+}
 
 struct ContentView: View {
-    //カスタムパスを描画していきます
-    
     var body: some View {
-        Path { path in
-            path.move(to: CGPoint(x: 200, y: 100))
-            path.addLine(to: CGPoint(x: 100, y: 300))
-            path.addLine(to: CGPoint(x: 300, y: 300))
-            path.addLine(to: CGPoint(x: 200, y: 100))
-//            path.closeSubpath()
-        }
-        //strokeを使用してpathの周りを描画（別の修正方法）
-        .stroke(.blue, style: StrokeStyle(lineWidth: 10,lineCap: .round,lineJoin: .round))
+        Arc(startAngle: .degrees(0), endAngle: .degrees(110), clockwise: true)
+            .stroke(.blue, lineWidth: 10)
+            .frame(width: 300,height: 300)
     }
 }
 
