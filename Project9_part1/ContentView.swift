@@ -21,10 +21,11 @@ struct Triangle: Shape {
     }
 }
 //shapeをカスタマイズ：円弧形状の最も単純なパターン記述
-struct Arc: Shape {
+struct Arc: InsettableShape {
     var startAngle: Angle
     var endAngle: Angle
     var clockwise: Bool
+    var insetAmount = 0.0
     
     func path(in rect: CGRect) -> Path {//0度を真上に持っていきたい
         let rotationAdjustment = Angle.degrees(90)
@@ -32,17 +33,22 @@ struct Arc: Shape {
         let modifiedEnd = endAngle - rotationAdjustment
         
         var path = Path()
-        path.addArc(center: CGPoint(x: rect.midX, y: rect.midY), radius: rect.width / 2, startAngle: modifiedStart, endAngle: modifiedEnd, clockwise: !clockwise)
+        path.addArc(center: CGPoint(x: rect.midX, y: rect.midY), radius: rect.width / 2 - insetAmount, startAngle: modifiedStart, endAngle: modifiedEnd, clockwise: !clockwise)
         
         return path
+    }
+    func inset(by amount: CGFloat) -> some InsettableShape {
+        var arc = self
+        arc.insetAmount += amount
+        return arc
     }
 }
 
 struct ContentView: View {
     var body: some View {
-        Arc(startAngle: .degrees(0), endAngle: .degrees(110), clockwise: true)
-            .stroke(.blue, lineWidth: 10)
-            .frame(width: 300,height: 300)
+        //Arcを使用してみる
+        Arc(startAngle: .degrees(0), endAngle: .degrees(360), clockwise: true)
+            .strokeBorder(.blue, lineWidth: 40)//Good
     }
 }
 
